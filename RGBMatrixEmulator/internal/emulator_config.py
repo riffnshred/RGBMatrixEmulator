@@ -42,6 +42,12 @@ class RGBMatrixEmulatorConfig:
             "led_rgb_sequence": "RGB",
         },
         "log_level": "info",
+        "gpio": {
+            "_comment": "For use with the pygame adapter. Maps keyboard/scroll wheel to GPIO pins.",
+            "buttons": [],
+            "toggles": [],
+            "rotary_encoders": [],
+        },
     }
 
     pixel_outline: int
