@@ -136,6 +136,7 @@ class InputMap:
 
     def _fire_rotary(self, clk_pin: int, dt_pin: int, direction: str):
         """Simulate rotary encoder pulse sequence."""
+        gpio_shim._update_encoder(clk_pin, dt_pin, direction)
         if direction == "cw":
             # CW: CLK rises first, then DT
             gpio_shim._trigger_pin(clk_pin, gpio_shim.HIGH)

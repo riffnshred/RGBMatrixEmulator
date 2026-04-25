@@ -38,6 +38,8 @@ _pull: dict = {}
 _callbacks: dict = {}
 # Tracks pins that have been triggered (for event_detected())
 _event_flags: dict = {}
+# Rotary encoder accumulated positions, keyed by (clk_pin, dt_pin)
+_encoder_values: dict = {}
 
 _mode = None
 
@@ -141,3 +143,10 @@ def _trigger_pin(pin: int, value: int):
             cb(pin)
         elif edge == FALLING and not rising:
             cb(pin)
+
+
+def _update_encoder(clk_pin: int, dt_pin: int, direction: str):
+    """Internal: accumulate rotary encoder ticks. Called by InputMap."""
+    key = (clk_pin, dt_pin)
+    current = _encoder_values.get(key, 0)
+    _encoder_values[key] = current + (1 if direction == "cw" else -1)
