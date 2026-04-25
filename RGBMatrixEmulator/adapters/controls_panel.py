@@ -21,6 +21,8 @@ _TOG_ON     = (30, 140, 230)
 _ENC_BG     = (45, 45, 45)
 _ENC_NEEDLE = (230, 150, 20)
 _ENC_RIM    = (85, 85, 85)
+_POT_FILL   = (230, 150, 20)
+_POT_TRACK  = (55, 55, 55)
 
 _PAD = 10
 
@@ -32,6 +34,7 @@ class ControlsPanel:
         self.buttons = gpio_config.get("buttons", [])
         self.toggles = gpio_config.get("toggles", [])
         self.encoders = gpio_config.get("rotary_encoders", [])
+        self.potentiometers = gpio_config.get("potentiometers", [])
         self._font_h = None   # header
         self._font_m = None   # medium
         self._font_s = None   # small
@@ -52,7 +55,8 @@ class ControlsPanel:
         y = self._draw_title(surface, x, y)
         y = self._draw_buttons(surface, x, y)
         y = self._draw_toggles(surface, x, y)
-        self._draw_encoders(surface, x, y)
+        y = self._draw_encoders(surface, x, y)
+        self._draw_potentiometers(surface, x, y)
 
     # ------------------------------------------------------------------
     # Sections
@@ -168,6 +172,45 @@ class ControlsPanel:
                 y += r * 2 + 8
 
             y += 4
+
+        return y
+
+    def _draw_potentiometers(self, surface, x, y):
+        if not self.potentiometers:
+            return y
+        for pot in self.potentiometers:
+            pin = pot["pin"]
+            min_val = float(pot.get("min", 0))
+            max_val = float(pot.get("max", 100))
+            label = pot.get("label", f"pin {pin}")
+            value = gpio_shim._get_pot(pin)
+
+            y = self._section_label(surface, x, y, "POT")
+
+            lbl = self._font_m.render(label, True, _TEXT)
+            surface.blit(lbl, (x + _PAD, y))
+            y += lbl.get_height() + 4
+
+            track_w = self.width - 2 * _PAD
+            track_h = 8
+            tx, ty = x + _PAD, y
+            pygame.draw.rect(surface, _POT_TRACK, (tx, ty, track_w, track_h), border_radius=3)
+
+            ratio = (value - min_val) / (max_val - min_val) if max_val > min_val else 0
+            fill_w = int(track_w * ratio)
+            if fill_w > 0:
+                pygame.draw.rect(surface, _POT_FILL, (tx, ty, fill_w, track_h), border_radius=3)
+
+            # Thumb indicator
+            thumb_x = tx + fill_w
+            pygame.draw.circle(surface, _POT_FILL, (thumb_x, ty + track_h // 2), 5)
+
+            y += track_h + 4
+            val_t = self._font_s.render(f"{value:.1f} / {max_val:.0f}", True, _ENC_NEEDLE)
+            surface.blit(val_t, (x + _PAD, y))
+            y += val_t.get_height() + 8
+
+        return y
 
     # ------------------------------------------------------------------
     # Helpers

@@ -40,6 +40,10 @@ _callbacks: dict = {}
 _event_flags: dict = {}
 # Rotary encoder accumulated positions, keyed by (clk_pin, dt_pin)
 _encoder_values: dict = {}
+# Potentiometer configs: pin → {min, max, step}
+_pot_configs: dict = {}
+# Potentiometer current values: pin → float
+_pot_values: dict = {}
 
 _mode = None
 
@@ -150,3 +154,24 @@ def _update_encoder(clk_pin: int, dt_pin: int, direction: str):
     key = (clk_pin, dt_pin)
     current = _encoder_values.get(key, 0)
     _encoder_values[key] = current + (1 if direction == "cw" else -1)
+
+
+def _init_pot(pin: int, min_val: float, max_val: float, step: float):
+    """Register a potentiometer pin with its range. Called by InputMap."""
+    _pot_configs[pin] = {"min": min_val, "max": max_val, "step": step}
+    if pin not in _pot_values:
+        _pot_values[pin] = float(min_val)
+
+
+def _set_pot(pin: int, value: float):
+    """Set potentiometer value (clamped to configured range) and fire callbacks."""
+    cfg = _pot_configs.get(pin, {"min": 0.0, "max": 100.0, "step": 1.0})
+    clamped = max(float(cfg["min"]), min(float(cfg["max"]), float(value)))
+    _pot_values[pin] = clamped
+    for _edge, cb in _callbacks.get(pin, []):
+        cb(pin)
+
+
+def _get_pot(pin: int) -> float:
+    """Read current potentiometer value."""
+    return _pot_values.get(pin, 0.0)

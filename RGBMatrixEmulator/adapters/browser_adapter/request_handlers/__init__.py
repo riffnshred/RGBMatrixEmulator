@@ -12,3 +12,7 @@ from RGBMatrixEmulator.adapters.browser_adapter.request_handlers.image_web_socke
 from RGBMatrixEmulator.adapters.browser_adapter.request_handlers.single_file import (
     SingleFileHandler,
 )
+from RGBMatrixEmulator.adapters.browser_adapter.request_handlers.gpio_handler import (
+    GpioHandler,
+    GpioTriggerHandler,
+)

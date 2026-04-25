@@ -36,6 +36,8 @@ class Server:
                 [
                     (r"/websocket", ImageWebSocketHandler),
                     (r"/image", ImageHandler),
+                    (r"/gpio", GpioHandler),
+                    (r"/gpio/trigger", GpioTriggerHandler),
                     (r"/", MainHandler),
                     # Icons are served by a specific handler to allow custom icons at arbitrary filepaths
                     (
@@ -67,7 +69,10 @@ class Server:
             Logger.info("Starting server...")
 
             self.instance.listening = True
-            self.instance.app.listen(self.instance.adapter.options.browser.port)
+            self.instance.app.listen(
+                self.instance.adapter.options.browser.port,
+                reuse_port=True,
+            )
             self.instance.io_loop = tornado.ioloop.IOLoop.current()
             thread = threading.Thread(
                 target=self.instance.io_loop.start,

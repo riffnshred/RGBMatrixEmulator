@@ -1,4 +1,4 @@
-import io, webbrowser
+import io, json, os, webbrowser
 from pathlib import Path
 
 from RGBMatrixEmulator.adapters.base import BaseAdapter
@@ -40,6 +40,20 @@ class BrowserAdapter(BaseAdapter):
             (Path(__file__).parent / "static" / "assets" / "icon.ico").resolve()
         )
         self._set_icon_path()
+
+        self.gpio_config = self.__load_gpio_config()
+        self.gpio_config_json = json.dumps(self.gpio_config)
+
+    def __load_gpio_config(self) -> dict:
+        from RGBMatrixEmulator.internal.emulator_config import RGBMatrixEmulatorConfig
+        cfg = RGBMatrixEmulatorConfig.DEFAULT_CONFIG.get("gpio", {})
+        if os.path.exists(RGBMatrixEmulatorConfig.CONFIG_PATH):
+            try:
+                with open(RGBMatrixEmulatorConfig.CONFIG_PATH) as f:
+                    cfg = json.load(f).get("gpio", cfg)
+            except Exception:
+                pass
+        return cfg
 
     def load_emulator_window(self):
         if self.loaded:

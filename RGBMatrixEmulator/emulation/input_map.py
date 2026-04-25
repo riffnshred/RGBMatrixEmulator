@@ -17,6 +17,17 @@ Config shape:
                 "sw_pin":  25,            # optional
                 "key_sw":  "r"            # optional
             }
+        ],
+        "potentiometers": [
+            {
+                "pin":      26,
+                "min":      0,
+                "max":      255,
+                "step":     1,            # optional, default 1
+                "key_up":   "scrollup",   # optional
+                "key_down": "scrolldown", # optional
+                "label":    "Brightness"  # optional, display only
+            }
         ]
     }
 
@@ -49,10 +60,12 @@ def _resolve_key(name: str):
 
 class InputMap:
     def __init__(self, gpio_config):
-        # Maps pygame key constant → (pin, type)  type in {"button", "toggle"}
+        # Maps pygame key constant → (pin, type)  type in {"button", "toggle", "pot_up", "pot_down"}
         self._key_to_pin: dict = {}
-        # Maps scroll direction sentinel → (clk_pin, dt_pin, direction)
+        # Rotary encoder scroll wheel entries: direction → [(clk_pin, dt_pin, _)]
         self._scroll_map: dict = {"scrollup": [], "scrolldown": []}
+        # Potentiometer scroll wheel entries: direction → [pin, ...]
+        self._scroll_pots: dict = {"scrollup": [], "scrolldown": []}
 
         self._build(gpio_config)
 
@@ -100,6 +113,32 @@ class InputMap:
                 f"cw='{enc.get('key_cw')}' ccw='{enc.get('key_ccw')}'"
             )
 
+        for pot in cfg.get("potentiometers", []):
+            pin = pot["pin"]
+            min_val = float(pot.get("min", 0))
+            max_val = float(pot.get("max", 100))
+            step = float(pot.get("step", 1))
+            gpio_shim._init_pot(pin, min_val, max_val, step)
+
+            up_key_name = pot.get("key_up", "")
+            dn_key_name = pot.get("key_down", "")
+
+            if up_key_name:
+                up_key = _resolve_key(up_key_name)
+                if up_key == "scrollup":
+                    self._scroll_pots["scrollup"].append(pin)
+                elif up_key is not None:
+                    self._key_to_pin[up_key] = (pin, "pot_up")
+
+            if dn_key_name:
+                dn_key = _resolve_key(dn_key_name)
+                if dn_key == "scrolldown":
+                    self._scroll_pots["scrolldown"].append(pin)
+                elif dn_key is not None:
+                    self._key_to_pin[dn_key] = (pin, "pot_down")
+
+            Logger.info(f"gpio: potentiometer pin={pin} min={min_val} max={max_val} step={step}")
+
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             self._handle_keydown(event.key)
@@ -109,9 +148,13 @@ class InputMap:
             if event.y > 0:
                 for clk, dt, _ in self._scroll_map["scrollup"]:
                     self._fire_rotary(clk, dt, "cw")
+                for pin in self._scroll_pots["scrollup"]:
+                    self._step_pot(pin, +1)
             elif event.y < 0:
                 for clk, dt, _ in self._scroll_map["scrolldown"]:
                     self._fire_rotary(clk, dt, "ccw")
+                for pin in self._scroll_pots["scrolldown"]:
+                    self._step_pot(pin, -1)
 
     def _handle_keydown(self, key_const):
         entry = self._key_to_pin.get(key_const)
@@ -126,6 +169,10 @@ class InputMap:
             self._fire_rotary(entry[0], entry[1], "cw")
         elif entry[1] == "rotary_ccw":
             self._fire_rotary(entry[0], entry[1], "ccw")
+        elif entry[1] == "pot_up":
+            self._step_pot(entry[0], +1)
+        elif entry[1] == "pot_down":
+            self._step_pot(entry[0], -1)
 
     def _handle_keyup(self, key_const):
         entry = self._key_to_pin.get(key_const)
@@ -133,6 +180,12 @@ class InputMap:
             return
         if entry[1] == "button":
             gpio_shim._trigger_pin(entry[0], gpio_shim.LOW)
+
+    def _step_pot(self, pin: int, direction: int):
+        """Advance a potentiometer by one step in the given direction (+1 or -1)."""
+        cfg = gpio_shim._pot_configs.get(pin, {"min": 0.0, "max": 100.0, "step": 1.0})
+        current = gpio_shim._get_pot(pin)
+        gpio_shim._set_pot(pin, current + direction * cfg["step"])
 
     def _fire_rotary(self, clk_pin: int, dt_pin: int, direction: str):
         """Simulate rotary encoder pulse sequence."""
