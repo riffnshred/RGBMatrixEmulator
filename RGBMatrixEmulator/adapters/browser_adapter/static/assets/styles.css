@@ -63,9 +63,6 @@
   --t-fast:   100ms ease;
   --t-normal: 200ms ease;
   --t-slow:   350ms ease;
-
-  /* Panel */
-  --panel-width: 240px;
 }
 
 /* ── Light theme: manual toggle ── */
@@ -158,13 +155,12 @@ body {
 /* ── Layout ── */
 #pageWrapper {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   min-height: 100vh;
 }
 
 #matrixSection {
   flex: 1;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -215,45 +211,57 @@ img#liveImg.no-border {
   font-weight: 500;
 }
 
-/* ── Controls panel ── */
+/* ── Controls bar (top) ── */
 #controlsPanel {
-  width: var(--panel-width);
-  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
   background: var(--clr-surface);
-  border-right: 1px solid var(--clr-border);
-  padding-bottom: var(--sp-6);
-  box-sizing: border-box;
+  border-bottom: 1px solid var(--clr-border);
   flex-shrink: 0;
-  overflow-y: auto;
-  order: -1;
+  overflow-x: auto;
   transition: background-color var(--t-slow), border-color var(--t-slow);
 }
 
-/* ── Panel title bar ── */
+#controlsPanel::-webkit-scrollbar {
+  height: 3px;
+}
+
+#controlsPanel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#controlsPanel::-webkit-scrollbar-thumb {
+  background: var(--clr-border);
+  border-radius: var(--rad-pill);
+}
+
+/* ── Panel title (inline left anchor) ── */
 .panelTitle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--sp-2);
-  padding: 10px var(--sp-3);
-  border-bottom: 1px solid var(--clr-border);
-  margin-bottom: var(--sp-2);
-  background: var(--clr-surface);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  transition: background-color var(--t-slow);
+  flex-shrink: 0;
+  padding-right: var(--sp-4);
+  border-right: 1px solid var(--clr-border-muted);
 }
 
 .panelTitleText {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--clr-fg-muted);
+}
+
+/* ── Controls content area ── */
+#controlsContent {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-3);
+  flex: 1;
 }
 
 /* ── WebSocket status dot ── */
@@ -299,8 +307,9 @@ img#liveImg.no-border {
   border-radius: var(--rad-md);
   color: var(--clr-fg-muted);
   cursor: pointer;
-  transition: background-color var(--t-fast), color var(--t-fast), border-color var(--t-fast);
   flex-shrink: 0;
+  margin-left: auto;
+  transition: background-color var(--t-fast), color var(--t-fast), border-color var(--t-fast);
 }
 
 #themeToggle:hover {
@@ -341,337 +350,83 @@ img#liveImg.no-border {
   }
 }
 
-/* ── Section labels ── */
-.sectionLabel {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--clr-fg-subtle);
-  padding: var(--sp-3) var(--sp-3) var(--sp-1);
-  margin-top: var(--sp-1);
-}
-
-.sectionLabel::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--clr-border-muted);
-}
-
-/* ── Key hint badge ── */
-.keyHint {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  color: var(--clr-fg-subtle);
-  background: var(--clr-surface-2);
-  border: 1px solid var(--clr-border-muted);
-  border-radius: var(--rad-sm);
-  padding: 1px 4px;
-  flex-shrink: 0;
-  letter-spacing: 0;
-  transition: background-color var(--t-fast);
-}
-
-/* ── Interactive row base ── */
-.interactive {
-  cursor: pointer;
-  border-radius: var(--rad-md);
-  transition: background-color var(--t-fast);
-  position: relative;
-}
-
-.interactive:hover {
-  background: var(--clr-hover);
-}
-
-.interactive:active {
-  background: var(--clr-active);
-}
-
-.interactive:focus-visible {
-  outline: 2px solid var(--clr-accent-blue);
-  outline-offset: -2px;
-}
-
-/* ── Buttons ── */
-.gpioButton {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 6px var(--sp-3);
-}
-
-.btnCap {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%,
-    var(--clr-surface-3) 0%,
-    var(--clr-surface-2) 45%,
-    var(--clr-surface)   100%);
-  box-shadow:
-    0 3px 6px rgba(0, 0, 0, 0.4),
-    0 0 0 2px var(--clr-border),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  flex-shrink: 0;
-  transition: transform var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
-}
-
-.btnCap.on {
-  background: radial-gradient(circle at 38% 32%,
-    #ffd06a 0%,
-    var(--clr-accent-amber) 45%,
-    #8a3600 100%);
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.6),
-    0 0 0 2px var(--clr-border),
-    inset 0 2px 5px rgba(0, 0, 0, 0.45),
-    0 0 14px rgba(240, 136, 62, 0.45);
-  transform: translateY(2px);
-}
-
-.gpioButton .lbl {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--clr-fg);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ── Toggles ── */
-.gpioToggle {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 6px var(--sp-3);
-}
-
-/* iOS-style horizontal pill track */
-.toggleTrack {
-  width: 38px;
-  height: 22px;
-  border-radius: var(--rad-pill);
-  background: var(--clr-surface-3);
-  border: 1.5px solid var(--clr-border);
-  flex-shrink: 0;
-  position: relative;
-  transition:
-    background-color var(--t-normal),
-    border-color var(--t-normal),
-    box-shadow var(--t-normal);
-  cursor: pointer;
-}
-
-.toggleTrack.on {
-  background: var(--clr-accent-green);
-  border-color: var(--clr-accent-green);
-  box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.2);
-}
-
-[data-theme="light"] .toggleTrack.on {
-  box-shadow: 0 0 0 3px rgba(26, 127, 55, 0.18);
-}
-
-/* Sliding thumb */
-.toggleThumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--clr-fg-muted);
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--t-normal), background-color var(--t-normal);
-}
-
-.toggleTrack.on .toggleThumb {
-  transform: translateX(16px);
-  background: #fff;
-}
-
-.gpioToggle .lbl {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--clr-fg);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ── Flat-ring SVG controls (encoder & pot shared) ── */
-.ringTrack        { stroke: var(--clr-border); fill: none; }
-.ringArcEnc       { stroke: var(--clr-accent-amber); fill: none; }
-.ringArcPot       { stroke: var(--clr-accent-teal);  fill: none; }
-.ringTick         { stroke: var(--clr-border); fill: none; }
-.ringTickMajor    { stroke: var(--clr-fg-subtle); fill: none; }
-.ringCenter       { fill: var(--clr-surface-2); stroke: var(--clr-border); stroke-width: 1; }
-.ringIndicatorEnc { fill: var(--clr-accent-amber); }
-.ringIndicatorPot { fill: var(--clr-accent-teal); }
-
-.ringValueText {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  fill: var(--clr-fg);
-  pointer-events: none;
-  user-select: none;
-}
-.ringValueTextPot { fill: var(--clr-accent-teal); }
-
-/* ── Encoder ── */
-.gpioEncoder {
-  padding: var(--sp-2) var(--sp-3) var(--sp-3);
-}
-
-.encoderDial {
-  display: block;
-  margin: var(--sp-2) auto var(--sp-1);
-  touch-action: none;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.35));
-  transition: filter var(--t-fast);
-}
-
-.encoderDial:hover {
-  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
-}
-
-.encoderDialRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-4);
-  margin-bottom: var(--sp-2);
-}
-
-.encBtn {
-  background: var(--clr-surface-2);
-  color: var(--clr-fg-muted);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--rad-md);
-  padding: 2px var(--sp-2);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: background-color var(--t-fast), color var(--t-fast), border-color var(--t-fast);
-  min-width: 28px;
-  text-align: center;
-}
-
-.encBtn:hover {
-  background: var(--clr-surface-3);
-  color: var(--clr-fg);
-  border-color: var(--clr-fg-subtle);
-}
-
-.encBtn:active {
-  background: var(--clr-active);
-}
-
-.encBtn:focus-visible {
-  outline: 2px solid var(--clr-accent-blue);
-  outline-offset: 2px;
-}
-
-
-.encoderPins {
+/* ── Hardware button (rounded square) ── */
+.hardBtnWrap {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-1);
-  padding: var(--sp-1) 0;
-}
-
-.encoderPin {
-  display: flex;
   align-items: center;
-  gap: var(--sp-2);
-  padding: 2px 0;
-}
-
-.encoderPin .led {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--clr-surface-3);
-  border: 1px solid var(--clr-border);
+  gap: var(--sp-1);
   flex-shrink: 0;
-  transition: background-color var(--t-fast), box-shadow var(--t-fast);
 }
 
-.encoderPin .led.on {
-  background: var(--clr-accent-green);
-  border-color: var(--clr-accent-green);
-  box-shadow: 0 0 5px rgba(63, 185, 80, 0.55);
+.hardBtnCap {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--rad-lg);
+  background: radial-gradient(circle at 38% 32%,
+    var(--clr-surface-3) 0%,
+    var(--clr-surface-2) 50%,
+    var(--clr-surface)   100%);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    0 0 0 1.5px var(--clr-border),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.encoderPin .lbl {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  color: var(--clr-fg-muted);
+.hardBtnCap:hover {
+  background: radial-gradient(circle at 38% 32%,
+    var(--clr-surface-3) 0%,
+    var(--clr-surface-3) 50%,
+    var(--clr-surface-2) 100%);
 }
 
-.encoderHint {
-  text-align: center;
-  font-size: 0.625rem;
-  color: var(--clr-fg-subtle);
-  margin-top: var(--sp-1);
+.hardBtnCap.on {
+  background: radial-gradient(circle at 38% 32%,
+    #ffd06a 0%,
+    var(--clr-accent-amber) 50%,
+    #8a3600 100%);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.7),
+    0 0 0 1.5px var(--clr-border),
+    inset 0 3px 6px rgba(0, 0, 0, 0.5),
+    0 0 18px rgba(240, 136, 62, 0.4);
+  transform: translateY(3px);
 }
 
-.encoderDivider {
-  height: 1px;
-  background: var(--clr-border-muted);
-  margin: var(--sp-2) 0 var(--sp-1);
-}
-
-.encoderSwLabel {
+.hardBtnLabel {
   font-size: 0.5625rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--clr-fg-subtle);
-  padding: 0 0 var(--sp-1);
-}
-
-/* ── Potentiometer ── */
-.gpioPot {
-  padding: var(--sp-2) var(--sp-3) var(--sp-3);
-}
-
-.potDial {
-  display: block;
-  margin: var(--sp-2) auto var(--sp-1);
-  touch-action: none;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.35));
-  transition: filter var(--t-fast);
-}
-
-.potDial:hover {
-  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
-}
-
-.potLabel {
-  font-size: 0.75rem;
-  font-weight: 500;
   color: var(--clr-fg-muted);
-  text-align: center;
-  padding: 0 0 var(--sp-1);
+  white-space: nowrap;
 }
 
-.potRangeRow {
+/* ── Neopixel (narrow rounded rectangle) ── */
+.neopixelWrap {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+  margin-left: var(--sp-2);
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--clr-border-muted);
 }
 
-.potRangeLabel {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  color: var(--clr-fg-subtle);
+.neopixelRect {
+  width: 28px;
+  height: 52px;
+  border-radius: var(--rad-lg);
+  background: var(--clr-surface-3);
+  border: 1.5px solid var(--clr-border);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--t-fast), box-shadow var(--t-fast), border-color var(--t-fast);
 }
 
 /* ── Debug / detail sections ── */
@@ -738,22 +493,4 @@ img#liveImg.no-border {
 
 .tableContainer tr:nth-child(even) td {
   background: rgba(127, 135, 145, 0.05);
-}
-
-/* ── Scrollbar ── */
-#controlsPanel::-webkit-scrollbar {
-  width: 4px;
-}
-
-#controlsPanel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#controlsPanel::-webkit-scrollbar-thumb {
-  background: var(--clr-border);
-  border-radius: var(--rad-pill);
-}
-
-#controlsPanel::-webkit-scrollbar-thumb:hover {
-  background: var(--clr-fg-subtle);
 }

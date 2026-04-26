@@ -44,6 +44,8 @@ _encoder_values: dict = {}
 _pot_configs: dict = {}
 # Potentiometer current values: pin → float
 _pot_values: dict = {}
+# RGB LED states: pin → (r, g, b)
+_rgb_states: dict = {}
 
 _mode = None
 
@@ -77,11 +79,23 @@ def input(channel):
     return _pin_states.get(channel, LOW)
 
 
+def set_rgb(pin: int, r: int, g: int, b: int):
+    """Set an RGB LED pin to a specific color."""
+    _rgb_states[pin] = (int(r), int(g), int(b))
+
+
 def output(channel, value):
     channels = channel if isinstance(channel, (list, tuple)) else [channel]
+    # A single (r, g, b) tuple targeting one pin: don't spread it across channels
+    if isinstance(value, tuple) and len(value) == 3 and not isinstance(channel, (list, tuple)):
+        set_rgb(channel, *value)
+        return
     values = value if isinstance(value, (list, tuple)) else [value] * len(channels)
     for ch, val in zip(channels, values):
-        _trigger_pin(ch, val)
+        if isinstance(val, (list, tuple)) and len(val) == 3:
+            set_rgb(ch, *val)
+        else:
+            _trigger_pin(ch, val)
 
 
 def add_event_detect(channel, edge, callback=None, bouncetime=None):
@@ -119,6 +133,7 @@ def cleanup(channel_list=None):
         _pull.clear()
         _callbacks.clear()
         _event_flags.clear()
+        _rgb_states.clear()
     else:
         channels = channel_list if isinstance(channel_list, (list, tuple)) else [channel_list]
         for ch in channels:
@@ -127,6 +142,7 @@ def cleanup(channel_list=None):
             _pull.pop(ch, None)
             _callbacks.pop(ch, None)
             _event_flags.pop(ch, None)
+            _rgb_states.pop(ch, None)
 
 
 def _trigger_pin(pin: int, value: int):

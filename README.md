@@ -95,7 +95,15 @@ The config file enables configurations to be customized on a per-script basis. Y
     "n_lanes": 1,
     "led_rgb_sequence": "RGB"
   },
-  "log_level": "info"
+  "log_level": "info",
+  "gpio": {
+    "buttons": [],
+    "toggles": [],
+    "rotary_encoders": [],
+    "potentiometers": [],
+    "rgb_leds": [],
+    "indicators": []
+  }
 }
 ```
 
@@ -138,6 +146,7 @@ Certain adapters may specify additional configurations. These specialized config
 | browser.debug_text       | Bool    | Display debug text.
 | browser.image_format     | String  | Image format to use for rendering. Options are "JPEG" or "PNG".
 | browser.open_immediately | Bool    | Open a new browser window immediately on startup (similar to other adapters).
+| browser.controls_layout  | String  | Layout of the GPIO controls panel in the browser UI. Options are `"horizontal"` (panel below the matrix) or `"vertical"` (panel to the right).
 
 ##### `pi5` Options
 
@@ -188,6 +197,87 @@ Please see the [README for the `pi5` display adapter](RGBMatrixEmulator/adapters
 If you prefer fine-grained control over the raw pixel data, such as to build integration testing or build your own UI on top of it, you can use the `raw` display adapter.
 
 Please see the [README for the `raw` display adapter](RGBMatrixEmulator/adapters/raw_adapter/README.md) for further information regarding its configuration and usage.
+
+### GPIO Emulation
+
+`RGBMatrixEmulator` includes a drop-in replacement for `RPi.GPIO` that lets scripts using GPIO inputs and outputs run on a PC without modification.
+
+#### Importing the GPIO Shim
+
+Use the standard conditional import pattern so the same code runs on real hardware and in the emulator:
+
+```python
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    from RGBMatrixEmulator.emulation import gpio_shim as GPIO
+```
+
+#### Configuring GPIO in `emulator_config.json`
+
+Add a `"gpio"` section to `emulator_config.json` to map keyboard keys and scroll wheel events to GPIO pins. Six types of controls are supported:
+
+```json
+"gpio": {
+    "buttons": [
+        {"key": "space", "pin": 17}
+    ],
+    "toggles": [
+        {"key": "t", "pin": 22}
+    ],
+    "rotary_encoders": [
+        {
+            "key_cw":  "scrollup",
+            "key_ccw": "scrolldown",
+            "clk_pin": 23,
+            "dt_pin":  24,
+            "sw_pin":  25,
+            "key_sw":  "r"
+        }
+    ],
+    "potentiometers": [
+        {"pin": 26, "min": 0, "max": 100, "step": 2,
+         "key_up": "up", "key_down": "down", "label": "Brightness"}
+    ],
+    "rgb_leds": [
+        {"pin": 28, "label": "Status"}
+    ],
+    "indicators": [
+        {"pin": 29, "label": "Paused", "color": "red"}
+    ]
+}
+```
+
+| Type | Direction | Description |
+| ---- | --------- | ----------- |
+| `buttons` | Input | Momentary press — HIGH while key is held, LOW on release. |
+| `toggles` | Input | Latching switch — flips state on each key press. |
+| `rotary_encoders` | Input | Rotary encoder — scroll wheel or keys drive CLK/DT pulse sequence. Optional push-button (`sw_pin` / `key_sw`). |
+| `potentiometers` | Input | Analog-style value — stepped up/down by key or scroll wheel. Read via `GPIO._get_pot(pin)`. |
+| `rgb_leds` | Output | RGB LED — set color via `GPIO.set_rgb(pin, r, g, b)` or `GPIO.output(pin, (r, g, b))`. |
+| `indicators` | Output | Single-color LED indicator — driven HIGH/LOW via `GPIO.output(pin, value)`. Supported colors: `green`, `red`, `yellow`, `blue`, `orange`, `white`, `cyan`, `purple`. |
+
+#### Reading GPIO State in Your Script
+
+```python
+# Read a button or toggle pin
+state = GPIO.input(17)
+
+# Read a potentiometer value (float between min and max)
+brightness = GPIO._get_pot(26)
+
+# Set an RGB LED color
+GPIO.set_rgb(28, 255, 128, 0)
+
+# Light an indicator LED
+GPIO.output(29, GPIO.HIGH)
+```
+
+#### GPIO Controls Panel
+
+Both the `pygame` and `browser` adapters display a live controls panel that mirrors the current GPIO state. In the `browser` adapter, the panel is also interactive — you can click buttons, flip toggles, turn encoders, and drag potentiometer sliders directly in the browser.
+
+See `samples/gpio-all-controls.py` for a complete working example using every control type.
 
 ### White Label Customization
 

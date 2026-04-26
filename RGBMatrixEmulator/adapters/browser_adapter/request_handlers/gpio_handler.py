@@ -13,8 +13,9 @@ class GpioHandler(NoCacheRequestHandler):
             for (clk, dt), val in gpio_shim._encoder_values.items()
         }
         pots = {str(k): v for k, v in gpio_shim._pot_values.items()}
+        rgb  = {str(k): list(v) for k, v in gpio_shim._rgb_states.items()}
         self.set_header("Content-Type", "application/json")
-        self.write(json.dumps({"pins": pins, "encoders": encoders, "pots": pots}))
+        self.write(json.dumps({"pins": pins, "encoders": encoders, "pots": pots, "rgb": rgb}))
 
 
 class GpioTriggerHandler(NoCacheRequestHandler):

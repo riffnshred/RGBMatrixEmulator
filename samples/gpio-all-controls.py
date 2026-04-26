@@ -13,6 +13,11 @@ Controls
   Pot 1        (pin 26, key up / down)    — overall brightness  (0 – 100 %)
   Pot 2        (pin 27, key right / left) — animation speed     (0 – 100 %)
 
+Indicators
+----------
+  RGB LED      (pin 28)                   — mirrors current foreground colour
+  Paused LED   (pin 29, red)              — lit when animation is paused
+
 Required emulator_config.json "gpio" section:
     "gpio": {
         "buttons": [{"key": "space", "pin": 17}],
@@ -32,6 +37,12 @@ Required emulator_config.json "gpio" section:
              "key_up": "up",    "key_down": "down",  "label": "Brightness"},
             {"pin": 27, "min": 0, "max": 100, "step": 2,
              "key_up": "right", "key_down": "left",  "label": "Speed"}
+        ],
+        "rgb_leds": [
+            {"pin": 28, "label": "Fg Color"}
+        ],
+        "indicators": [
+            {"pin": 29, "label": "Paused", "color": "red"}
         ]
     }
 """
@@ -51,13 +62,15 @@ except ImportError:
     from RGBMatrixEmulator.emulation import gpio_shim as GPIO
 
 # ── Pin assignments ────────────────────────────────────────────────────────────
-BUTTON_PIN = 17   # momentary push-button
-PAUSE_PIN  = 22   # toggle switch
-CLK_PIN    = 23   # rotary encoder clock
-DT_PIN     = 24   # rotary encoder data
-SW_PIN     = 25   # rotary encoder push-button
-BRIGHT_PIN = 26   # potentiometer → brightness
-SPEED_PIN  = 27   # potentiometer → animation speed
+BUTTON_PIN  = 17   # momentary push-button
+PAUSE_PIN   = 22   # toggle switch
+CLK_PIN     = 23   # rotary encoder clock
+DT_PIN      = 24   # rotary encoder data
+SW_PIN      = 25   # rotary encoder push-button
+BRIGHT_PIN  = 26   # potentiometer → brightness
+SPEED_PIN   = 27   # potentiometer → animation speed
+RGB_PIN     = 28   # RGB LED — mirrors current foreground colour
+PAUSED_PIN  = 29   # indicator LED — lit when paused
 
 # ── Animation modes ────────────────────────────────────────────────────────────
 MODES     = ["plasma", "scan", "starfield"]
@@ -100,13 +113,15 @@ class GpioAllControls(SampleBase):
         global _last_clk
 
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(PAUSE_PIN,  GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(CLK_PIN,    GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(DT_PIN,     GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(SW_PIN,     GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(BUTTON_PIN, GPIO.IN,  pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(PAUSE_PIN,  GPIO.IN,  pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(CLK_PIN,    GPIO.IN,  pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(DT_PIN,     GPIO.IN,  pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(SW_PIN,     GPIO.IN,  pull_up_down=GPIO.PUD_UP)
         GPIO.setup(BRIGHT_PIN, GPIO.IN)
         GPIO.setup(SPEED_PIN,  GPIO.IN)
+        GPIO.setup(RGB_PIN,    GPIO.OUT)
+        GPIO.setup(PAUSED_PIN, GPIO.OUT)
 
         _last_clk = GPIO.input(CLK_PIN)
 
@@ -134,6 +149,11 @@ class GpioAllControls(SampleBase):
                 hue_base = COLORS[_mode_index % NUM_MODES]      # read once per frame
                 fg_hue   = COLORS[_color_index]
                 mode     = _mode_index
+
+                # ── Output indicators ────────────────────────────────────
+                fr, fg, fb = colorsys.hsv_to_rgb(fg_hue, 1.0, max(0.15, bright))
+                GPIO.set_rgb(RGB_PIN, int(fr * 255), int(fg * 255), int(fb * 255))
+                GPIO.output(PAUSED_PIN, GPIO.HIGH if paused else GPIO.LOW)
 
                 if not paused:
                     t += 0.03 + speed * 0.12
@@ -187,7 +207,7 @@ class GpioAllControls(SampleBase):
 
         finally:
             GPIO.cleanup([BUTTON_PIN, PAUSE_PIN, CLK_PIN, DT_PIN, SW_PIN,
-                          BRIGHT_PIN, SPEED_PIN])
+                          BRIGHT_PIN, SPEED_PIN, RGB_PIN, PAUSED_PIN])
 
 
 if __name__ == "__main__":

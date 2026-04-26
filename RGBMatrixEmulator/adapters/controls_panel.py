@@ -26,6 +26,17 @@ _POT_TRACK  = (55, 55, 55)
 
 _PAD = 10
 
+_IND_COLORS = {
+    "green":  (30, 210, 90),
+    "red":    (220, 50, 50),
+    "yellow": (230, 220, 50),
+    "blue":   (58, 150, 255),
+    "orange": (240, 136, 62),
+    "white":  (210, 210, 210),
+    "cyan":   (30, 210, 210),
+    "purple": (170, 80, 230),
+}
+
 
 class ControlsPanel:
     def __init__(self, gpio_config: dict, width: int, height: int):
@@ -35,6 +46,8 @@ class ControlsPanel:
         self.toggles = gpio_config.get("toggles", [])
         self.encoders = gpio_config.get("rotary_encoders", [])
         self.potentiometers = gpio_config.get("potentiometers", [])
+        self.indicators = gpio_config.get("indicators", [])
+        self.rgb_leds   = gpio_config.get("rgb_leds", [])
         self._font_h = None   # header
         self._font_m = None   # medium
         self._font_s = None   # small
@@ -53,6 +66,8 @@ class ControlsPanel:
 
         y = _PAD
         y = self._draw_title(surface, x, y)
+        y = self._draw_indicators(surface, x, y)
+        y = self._draw_rgb_leds(surface, x, y)
         y = self._draw_buttons(surface, x, y)
         y = self._draw_toggles(surface, x, y)
         y = self._draw_encoders(surface, x, y)
@@ -68,6 +83,59 @@ class ControlsPanel:
         y += t.get_height() + 4
         pygame.draw.line(surface, _DIVIDER, (x + _PAD, y), (x + self.width - _PAD, y))
         return y + 6
+
+    def _draw_indicators(self, surface, x, y):
+        if not self.indicators:
+            return y
+        y = self._section_label(surface, x, y, "INDICATORS")
+        for ind in self.indicators:
+            pin = ind["pin"]
+            label = ind.get("label", f"pin {pin}")
+            color_name = ind.get("color", "green").lower()
+            on_color = _IND_COLORS.get(color_name, _IND_COLORS["green"])
+            on = gpio_shim.input(pin) == gpio_shim.HIGH
+            r = 7
+            cx = x + _PAD + r
+            cy = y + r
+            color = on_color if on else _BTN_OFF
+            pygame.draw.circle(surface, color, (cx, cy), r)
+            if on:
+                pygame.draw.circle(surface, tuple(min(255, c + 60) for c in on_color), (cx, cy), r, 1)
+            lbl = self._font_m.render(label, True, _TEXT if on else _LABEL)
+            surface.blit(lbl, (cx + r + 5, cy - lbl.get_height() // 2))
+            y += r * 2 + 7
+        return y + 4
+
+    def _draw_rgb_leds(self, surface, x, y):
+        if not self.rgb_leds:
+            return y
+        y = self._section_label(surface, x, y, "RGB LEDS")
+        for led in self.rgb_leds:
+            pin = led["pin"]
+            label = led.get("label", f"pin {pin}")
+            rgb = gpio_shim._rgb_states.get(pin, None)
+            r_outer = 10
+            cx = x + _PAD + r_outer
+            cy = y + r_outer
+            # Outer dark ring
+            pygame.draw.circle(surface, (40, 40, 40), (cx, cy), r_outer)
+            if rgb is not None:
+                color = (max(0, min(255, rgb[0])), max(0, min(255, rgb[1])), max(0, min(255, rgb[2])))
+                pygame.draw.circle(surface, color, (cx, cy), r_outer - 2)
+                # Inner highlight for glow effect
+                brightness = (rgb[0] + rgb[1] + rgb[2]) / 3
+                if brightness > 10:
+                    hi = tuple(min(255, c + 80) for c in color)
+                    pygame.draw.circle(surface, hi, (cx - 3, cy - 3), 3)
+            else:
+                pygame.draw.circle(surface, (30, 30, 30), (cx, cy), r_outer - 2)
+            lbl = self._font_m.render(label, True, _TEXT if rgb else _LABEL)
+            surface.blit(lbl, (cx + r_outer + 5, cy - lbl.get_height() // 2))
+            if rgb is not None:
+                val_t = self._font_s.render(f"rgb({rgb[0]},{rgb[1]},{rgb[2]})", True, _LABEL)
+                surface.blit(val_t, (cx + r_outer + 5, cy + lbl.get_height() // 2 - 1))
+            y += r_outer * 2 + 7
+        return y + 4
 
     def _draw_buttons(self, surface, x, y):
         if not self.buttons:
