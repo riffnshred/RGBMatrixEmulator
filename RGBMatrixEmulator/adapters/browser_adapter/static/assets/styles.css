@@ -523,3 +523,632 @@ img#liveImg.no-border {
 .tableContainer tr:nth-child(even) td {
   background: rgba(127, 135, 145, 0.05);
 }
+
+/* ── Toggle switch ── */
+.toggleWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+  align-self: stretch;
+  margin-left: var(--sp-2);
+  padding-left: var(--sp-5);
+  border-left: 1px solid var(--clr-border-muted);
+}
+
+/* Outer housing — narrow vertical slot */
+.toggleSwitch {
+  width: 22px;
+  height: 52px;
+  border-radius: 11px;
+  background:
+    linear-gradient(to bottom,
+      var(--clr-surface)   0%,
+      var(--clr-surface-2) 40%,
+      var(--clr-surface)   100%);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.6),
+    0 0 0 1.5px var(--clr-border),
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;   /* thumb positioned by translateY */
+  justify-content: center;
+  padding: 3px;
+  transition: box-shadow var(--t-fast), background var(--t-normal);
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.toggleSwitch:hover {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.65),
+    0 0 0 1.5px var(--clr-accent-blue),
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.04);
+}
+
+/* Thumb — the physical lever knob */
+/* OFF = bottom (translateY 26px = 52 - 6pad - 20thumb) */
+.toggleThumb {
+  width: 16px;
+  height: 20px;
+  border-radius: 8px;
+  background: linear-gradient(to bottom,
+    #c8cdd5 0%,
+    #8b949e 50%,
+    #6e7681 100%);
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  transform: translateY(26px);
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background var(--t-normal),
+              box-shadow var(--t-normal);
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Grip lines on the thumb */
+.toggleThumb::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 -3px 0 rgba(255, 255, 255, 0.2),
+    0  3px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* ON: thumb slides to the top */
+.toggleSwitch.on {
+  background:
+    linear-gradient(to bottom,
+      rgba(88, 166, 255, 0.12) 0%,
+      var(--clr-surface-2)     40%,
+      var(--clr-surface)       100%);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.6),
+    0 0 0 1.5px var(--clr-accent-blue),
+    0 0 12px rgba(88, 166, 255, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.04);
+}
+
+.toggleSwitch.on .toggleThumb {
+  transform: translateY(0);
+  background: linear-gradient(to bottom,
+    #ddeeff 0%,
+    #88b8f0 50%,
+    #5a9ce0 100%);
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(88, 166, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Light theme tweaks */
+[data-theme="light"] .toggleSwitch {
+  background:
+    linear-gradient(to bottom,
+      #e8eaed 0%,
+      #d0d7de 40%,
+      #e8eaed 100%);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.25),
+    0 0 0 1.5px var(--clr-border),
+    inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .toggleThumb {
+  background: linear-gradient(to bottom,
+    #ffffff 0%,
+    #c8d3de 50%,
+    #a0aab4 100%);
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .toggleSwitch.on {
+  background:
+    linear-gradient(to bottom,
+      rgba(9, 105, 218, 0.1) 0%,
+      #d0d7de                40%,
+      #e8eaed                100%);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 1.5px var(--clr-accent-blue),
+    0 0 8px rgba(9, 105, 218, 0.15),
+    inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .toggleSwitch.on .toggleThumb {
+  background: linear-gradient(to bottom,
+    #e8f4ff 0%,
+    #6aadee 50%,
+    #3a8ed8 100%);
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.2),
+    0 0 6px rgba(9, 105, 218, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* .toggleTrack is no longer rendered but kept for safety */
+.toggleTrack { display: none; }
+
+/* ── Encoder dial ── */
+.encoderWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+  margin-left: var(--sp-2);
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--clr-border-muted);
+}
+
+.encoderDialOuter {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%,
+    #2e3440 0%,
+    #1a1f27 45%,
+    #0d1117 100%);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.7),
+    0 0 0 1.5px var(--clr-border),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  position: relative;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  flex-shrink: 0;
+  transition: box-shadow var(--t-fast);
+}
+
+.encoderDialOuter:hover {
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.8),
+    0 0 0 1.5px var(--clr-fg-subtle),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.encoderDialInner {
+  position: absolute;
+  top: 5px; left: 5px;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: conic-gradient(
+    rgba(255,255,255,0.03) 0deg,
+    transparent 30deg,
+    rgba(255,255,255,0.03) 60deg,
+    transparent 90deg,
+    rgba(255,255,255,0.03) 120deg,
+    transparent 150deg,
+    rgba(255,255,255,0.03) 180deg,
+    transparent 210deg,
+    rgba(255,255,255,0.03) 240deg,
+    transparent 270deg,
+    rgba(255,255,255,0.03) 300deg,
+    transparent 330deg,
+    rgba(255,255,255,0.03) 360deg
+  );
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.encoderDialCap {
+  position: absolute;
+  top: 14px; left: 14px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%,
+    #3a4150 0%,
+    #222830 55%,
+    #141820 100%);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 2px rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: background var(--t-fast), box-shadow var(--t-fast);
+}
+
+.encoderDialCap.on {
+  background: radial-gradient(circle at 38% 30%,
+    #4a5568 0%,
+    #2d3748 55%,
+    #1a202c 100%);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(88, 166, 255, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 10px rgba(88, 166, 255, 0.2);
+}
+
+.encoderValueLabel {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--clr-fg-muted);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+[data-theme="light"] .encoderDialOuter {
+  background: radial-gradient(circle at 38% 30%,
+    #f1f5f9 0%,
+    #cbd5e1 45%,
+    #94a3b8 100%);
+  box-shadow:
+    0 4px 10px rgba(100, 116, 139, 0.4),
+    0 0 0 1.5px var(--clr-border),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .encoderDialOuter {
+    background: radial-gradient(circle at 38% 30%,
+      #f1f5f9 0%,
+      #cbd5e1 45%,
+      #94a3b8 100%);
+    box-shadow:
+      0 4px 10px rgba(100, 116, 139, 0.4),
+      0 0 0 1.5px var(--clr-border),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+}
+
+[data-theme="light"] .encoderDialOuter:hover {
+  box-shadow:
+    0 4px 14px rgba(100, 116, 139, 0.5),
+    0 0 0 1.5px var(--clr-fg-subtle),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .encoderDialInner {
+  background: conic-gradient(
+    rgba(0,0,0,0.05) 0deg,
+    transparent 30deg,
+    rgba(0,0,0,0.05) 60deg,
+    transparent 90deg,
+    rgba(0,0,0,0.05) 120deg,
+    transparent 150deg,
+    rgba(0,0,0,0.05) 180deg,
+    transparent 210deg,
+    rgba(0,0,0,0.05) 240deg,
+    transparent 270deg,
+    rgba(0,0,0,0.05) 300deg,
+    transparent 330deg,
+    rgba(0,0,0,0.05) 360deg
+  );
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .encoderDialCap {
+  background: radial-gradient(circle at 38% 30%,
+    #ffffff 0%,
+    #e2e8f0 55%,
+    #b0bec5 100%);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="light"] .encoderDialCap.on {
+  background: radial-gradient(circle at 38% 30%,
+    #dbeafe 0%,
+    #bfdbfe 55%,
+    #93c5fd 100%);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(9, 105, 218, 0.4),
+    inset 0 2px 4px rgba(9, 105, 218, 0.15),
+    0 0 10px rgba(9, 105, 218, 0.25);
+}
+
+[data-theme="light"] .encoderDialOuter svg line {
+  stroke: rgba(0, 0, 0, 0.55);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .encoderDialOuter:hover {
+    box-shadow:
+      0 4px 14px rgba(100, 116, 139, 0.5),
+      0 0 0 1.5px var(--clr-fg-subtle),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  :root:not([data-theme="dark"]) .encoderDialInner {
+    background: conic-gradient(
+      rgba(0,0,0,0.05) 0deg,
+      transparent 30deg,
+      rgba(0,0,0,0.05) 60deg,
+      transparent 90deg,
+      rgba(0,0,0,0.05) 120deg,
+      transparent 150deg,
+      rgba(0,0,0,0.05) 180deg,
+      transparent 210deg,
+      rgba(0,0,0,0.05) 240deg,
+      transparent 270deg,
+      rgba(0,0,0,0.05) 300deg,
+      transparent 330deg,
+      rgba(0,0,0,0.05) 360deg
+    );
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  :root:not([data-theme="dark"]) .encoderDialCap {
+    background: radial-gradient(circle at 38% 30%,
+      #ffffff 0%,
+      #e2e8f0 55%,
+      #b0bec5 100%);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(0, 0, 0, 0.08),
+      inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  }
+
+  :root:not([data-theme="dark"]) .encoderDialCap.on {
+    background: radial-gradient(circle at 38% 30%,
+      #dbeafe 0%,
+      #bfdbfe 55%,
+      #93c5fd 100%);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(9, 105, 218, 0.4),
+      inset 0 2px 4px rgba(9, 105, 218, 0.15),
+      0 0 10px rgba(9, 105, 218, 0.25);
+  }
+
+  :root:not([data-theme="dark"]) .encoderDialOuter svg line {
+    stroke: rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* ── Potentiometer dial ── */
+.potWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+  margin-left: var(--sp-2);
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--clr-border-muted);
+}
+
+.potDialOuter {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%,
+    #2e3440 0%,
+    #1a1f27 45%,
+    #0d1117 100%);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.7),
+    0 0 0 1.5px var(--clr-border),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  position: relative;
+  cursor: ns-resize;
+  -webkit-user-select: none;
+  user-select: none;
+  flex-shrink: 0;
+  transition: box-shadow var(--t-fast);
+}
+
+.potDialOuter:hover {
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.8),
+    0 0 0 1.5px var(--clr-fg-subtle),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.potDialInner {
+  position: absolute;
+  top: 5px; left: 5px;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: conic-gradient(
+    rgba(255,255,255,0.03) 0deg,
+    transparent 30deg,
+    rgba(255,255,255,0.03) 60deg,
+    transparent 90deg,
+    rgba(255,255,255,0.03) 120deg,
+    transparent 150deg,
+    rgba(255,255,255,0.03) 180deg,
+    transparent 210deg,
+    rgba(255,255,255,0.03) 240deg,
+    transparent 270deg,
+    rgba(255,255,255,0.03) 300deg,
+    transparent 330deg,
+    rgba(255,255,255,0.03) 360deg
+  );
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.potDialCap {
+  position: absolute;
+  top: 14px; left: 14px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%,
+    #3a4150 0%,
+    #222830 55%,
+    #141820 100%);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 2px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.potValueLabel {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--clr-fg-muted);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+[data-theme="light"] .potDialOuter {
+  background: radial-gradient(circle at 38% 30%,
+    #f1f5f9 0%,
+    #cbd5e1 45%,
+    #94a3b8 100%);
+  box-shadow:
+    0 4px 10px rgba(100, 116, 139, 0.4),
+    0 0 0 1.5px var(--clr-border),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .potDialOuter:hover {
+  box-shadow:
+    0 4px 14px rgba(100, 116, 139, 0.5),
+    0 0 0 1.5px var(--clr-fg-subtle),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .potDialInner {
+  background: conic-gradient(
+    rgba(0,0,0,0.05) 0deg,
+    transparent 30deg,
+    rgba(0,0,0,0.05) 60deg,
+    transparent 90deg,
+    rgba(0,0,0,0.05) 120deg,
+    transparent 150deg,
+    rgba(0,0,0,0.05) 180deg,
+    transparent 210deg,
+    rgba(0,0,0,0.05) 240deg,
+    transparent 270deg,
+    rgba(0,0,0,0.05) 300deg,
+    transparent 330deg,
+    rgba(0,0,0,0.05) 360deg
+  );
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .potDialCap {
+  background: radial-gradient(circle at 38% 30%,
+    #ffffff 0%,
+    #e2e8f0 55%,
+    #b0bec5 100%);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="light"] .potDialOuter svg line {
+  stroke: rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="light"] .potDialOuter svg path:first-child {
+  stroke: rgba(0, 0, 0, 0.12);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .potDialOuter {
+    background: radial-gradient(circle at 38% 30%,
+      #f1f5f9 0%,
+      #cbd5e1 45%,
+      #94a3b8 100%);
+    box-shadow:
+      0 4px 10px rgba(100, 116, 139, 0.4),
+      0 0 0 1.5px var(--clr-border),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  :root:not([data-theme="dark"]) .potDialOuter:hover {
+    box-shadow:
+      0 4px 14px rgba(100, 116, 139, 0.5),
+      0 0 0 1.5px var(--clr-fg-subtle),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  :root:not([data-theme="dark"]) .potDialInner {
+    background: conic-gradient(
+      rgba(0,0,0,0.05) 0deg,
+      transparent 30deg,
+      rgba(0,0,0,0.05) 60deg,
+      transparent 90deg,
+      rgba(0,0,0,0.05) 120deg,
+      transparent 150deg,
+      rgba(0,0,0,0.05) 180deg,
+      transparent 210deg,
+      rgba(0,0,0,0.05) 240deg,
+      transparent 270deg,
+      rgba(0,0,0,0.05) 300deg,
+      transparent 330deg,
+      rgba(0,0,0,0.05) 360deg
+    );
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  :root:not([data-theme="dark"]) .potDialCap {
+    background: radial-gradient(circle at 38% 30%,
+      #ffffff 0%,
+      #e2e8f0 55%,
+      #b0bec5 100%);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(0, 0, 0, 0.08),
+      inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  }
+
+  :root:not([data-theme="dark"]) .potDialOuter svg line {
+    stroke: rgba(0, 0, 0, 0.55);
+  }
+
+  :root:not([data-theme="dark"]) .potDialOuter svg path:first-child {
+    stroke: rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* ── Indicator LED ── */
+.indicatorWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+  margin-left: var(--sp-2);
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--clr-border-muted);
+}
+
+.indicatorDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--clr-surface-3);
+  border: 1.5px solid var(--clr-border);
+  box-shadow: var(--shadow-inset);
+  transition: background var(--t-fast), box-shadow var(--t-fast), border-color var(--t-fast);
+  flex-shrink: 0;
+  margin: 18px 0;
+}
+
+.indicatorDot.on {
+  border-color: transparent;
+}
