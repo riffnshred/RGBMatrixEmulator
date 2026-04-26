@@ -4,8 +4,6 @@
     const FPS_UPDATE_RATE = 300;
     const GPIO_POLL_MS    = 100;
 
-    const BTN_LABELS = ["UP/LEFT", "DOWN/RIGHT", "A"];
-
     const img       = document.getElementById("liveImg");
     const fpsText   = document.getElementById("fps");
     const fpsTarget = parseInt(document.getElementById("targetFps").value) || FPS_DEFAULT;
@@ -43,7 +41,7 @@
 
         // 3 rounded-square buttons: UP/LEFT, DOWN/RIGHT, A
         const buttons = gpioConfig.buttons || [];
-        for (let i = 0; i < Math.min(3, buttons.length); i++) {
+        for (let i = 0; i < buttons.length; i++) {
             const btn = buttons[i];
             const wrap = el("div", "hardBtnWrap");
             const cap  = el("div", "hardBtnCap");
@@ -56,7 +54,7 @@
             cap.addEventListener("touchend",    () => trigger({type:"button", pin:btn.pin, value:1}));
 
             const lbl = el("div", "hardBtnLabel");
-            lbl.textContent = BTN_LABELS[i];
+            lbl.textContent = btn.key || `BTN ${i + 1}`;
 
             wrap.appendChild(cap);
             wrap.appendChild(lbl);
