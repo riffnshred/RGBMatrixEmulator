@@ -49,11 +49,11 @@
             const cap  = el("div", "hardBtnCap");
             cap.id = `led_pin_${btn.pin}`;
 
-            cap.addEventListener("mousedown",   () => trigger({type:"button", pin:btn.pin, value:1}));
-            cap.addEventListener("mouseup",     () => trigger({type:"button", pin:btn.pin, value:0}));
-            cap.addEventListener("mouseleave",  () => trigger({type:"button", pin:btn.pin, value:0}));
-            cap.addEventListener("touchstart",  (e) => { e.preventDefault(); trigger({type:"button", pin:btn.pin, value:1}); });
-            cap.addEventListener("touchend",    () => trigger({type:"button", pin:btn.pin, value:0}));
+            cap.addEventListener("mousedown",   () => trigger({type:"button", pin:btn.pin, value:0}));
+            cap.addEventListener("mouseup",     () => trigger({type:"button", pin:btn.pin, value:1}));
+            cap.addEventListener("mouseleave",  () => trigger({type:"button", pin:btn.pin, value:1}));
+            cap.addEventListener("touchstart",  (e) => { e.preventDefault(); trigger({type:"button", pin:btn.pin, value:0}); });
+            cap.addEventListener("touchend",    () => trigger({type:"button", pin:btn.pin, value:1}));
 
             const lbl = el("div", "hardBtnLabel");
             lbl.textContent = BTN_LABELS[i];
@@ -99,7 +99,7 @@
                 // Update button cap state
                 for (const [pin, state] of Object.entries(data.pins)) {
                     const led = document.getElementById(`led_pin_${pin}`);
-                    if (led) led.classList.toggle("on", state === 1);
+                    if (led) led.classList.toggle("on", state === 0);
                 }
 
                 // Update neopixel rect color

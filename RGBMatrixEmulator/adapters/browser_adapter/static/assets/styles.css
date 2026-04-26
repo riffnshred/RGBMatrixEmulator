@@ -350,6 +350,35 @@ img#liveImg.no-border {
   }
 }
 
+/* ── Light theme: button pressed state ── */
+[data-theme="light"] .hardBtnCap.on {
+  background: radial-gradient(circle at 38% 32%,
+    #a8d4ff 0%,
+    #8caed6 50%,
+    #5d728e 100%);
+  box-shadow:
+    0 1px 2px rgba(9, 105, 218, 0.25),
+    0 0 0 1.5px #0969da,
+    inset 0 3px 6px rgba(0, 35, 90, 0.35),
+    0 0 14px rgba(9, 105, 218, 0.28);
+  transform: translateY(3px);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .hardBtnCap.on {
+    background: radial-gradient(circle at 38% 32%,
+      #a8d4ff 0%,
+      #0969da 50%,
+      #003d8f 100%);
+    box-shadow:
+      0 1px 2px rgba(9, 105, 218, 0.25),
+      0 0 0 1.5px #0969da,
+      inset 0 3px 6px rgba(0, 35, 90, 0.35),
+      0 0 14px rgba(9, 105, 218, 0.28);
+    transform: translateY(3px);
+  }
+}
+
 /* ── Hardware button (rounded square) ── */
 .hardBtnWrap {
   display: flex;
