@@ -13,23 +13,27 @@ class ImageWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     @classmethod
     def broadcast(cls):
-        if not ImageWebSocketHandler.adapter.image_ready:
+        adapter = ImageWebSocketHandler.adapter
+
+        # Encode the latest stashed frame on the IO loop. Skips when pixels
+        # haven't changed since the previous broadcast.
+        if not adapter.encode_for_broadcast():
             return
 
-        if not ImageWebSocketHandler.adapter.image:
+        if not adapter.image:
             Logger.warning(
-                "No image received from {}!".format(
-                    ImageWebSocketHandler.adapter.__class__.__name__
-                )
+                "No image received from {}!".format(adapter.__class__.__name__)
             )
             return
 
+        if not cls.clients:
+            return
+
+        payload = adapter.image
         io_loop = tornado.ioloop.IOLoop.current()
 
         for client in list(cls.clients):
-            io_loop.add_callback(
-                client.write_message, ImageWebSocketHandler.adapter.image, binary=True
-            )
+            io_loop.add_callback(client.write_message, payload, binary=True)
 
         FPS.tick()
 

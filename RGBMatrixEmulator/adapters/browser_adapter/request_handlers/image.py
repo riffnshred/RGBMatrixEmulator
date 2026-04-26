@@ -5,6 +5,7 @@ from RGBMatrixEmulator.adapters.browser_adapter.request_handlers import (
 
 class ImageHandler(NoCacheRequestHandler):
     def get(self):
+        self.adapter.encode_for_broadcast()
         self.set_header(
             "Content-type", "image/{}".format(self.adapter.image_format.lower())
         )

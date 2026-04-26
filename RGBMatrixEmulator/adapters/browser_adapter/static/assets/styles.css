@@ -170,16 +170,17 @@ body {
 }
 
 /* ── Matrix image ── */
-img#liveImg {
+#liveImg {
   display: block;
   border: 1px solid var(--clr-border);
   border-radius: var(--rad-sm);
   box-shadow: var(--shadow-md);
   background: #000;
   transition: border-color var(--t-normal);
+  image-rendering: pixelated;
 }
 
-img#liveImg.no-border {
+#liveImg.no-border {
   border: none;
   box-shadow: none;
 }
