@@ -45,6 +45,8 @@ class BrowserAdapter(BaseAdapter):
                 self.default_image_format.lower()
             )
 
+        self._encode_kwargs = self.__build_encode_kwargs()
+
         # Default icon path is browser adapter assets
         self.default_icon_path = str(
             (Path(__file__).parent / "static" / "assets" / "icon.ico").resolve()
@@ -53,6 +55,13 @@ class BrowserAdapter(BaseAdapter):
 
         self.gpio_config = self.__load_gpio_config()
         self.gpio_config_json = json.dumps(self.gpio_config)
+
+    def __build_encode_kwargs(self) -> dict:
+        # libwebp's method=0 is the real-time encoder; default 4 spends time on
+        # filter/partition search that's wasted on a small live-streamed frame.
+        if self.image_format == "WebP":
+            return {"method": 0}
+        return {}
 
     def __load_gpio_config(self) -> dict:
         from RGBMatrixEmulator.internal.emulator_config import RGBMatrixEmulatorConfig
@@ -108,6 +117,7 @@ class BrowserAdapter(BaseAdapter):
                 bytesIO,
                 self.image_format,
                 quality=self.options.browser.quality,
+                **self._encode_kwargs,
             )
             self.image = bytesIO.getvalue()
 

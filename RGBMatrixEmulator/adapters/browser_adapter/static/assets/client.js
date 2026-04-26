@@ -477,7 +477,7 @@
         ws.onmessage = function (evt) {
             nFrames++;
 
-            const blob = new Blob([evt.data], { type: "image/jpeg" });
+            const blob = new Blob([evt.data], { type: IMAGE_MIME });
             createImageBitmap(blob).then((bitmap) => {
                 if (canvas.width !== bitmap.width || canvas.height !== bitmap.height) {
                     canvas.width  = bitmap.width;

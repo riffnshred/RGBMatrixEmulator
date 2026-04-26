@@ -124,7 +124,10 @@
       </div>
 
       <input id="targetFps" type="hidden" value={{ adapter.options.browser.target_fps }} />
-      <script>const GPIO_CONFIG = {% raw adapter.gpio_config_json %};</script>
+      <script>
+         const GPIO_CONFIG = {% raw adapter.gpio_config_json %};
+         const IMAGE_MIME  = "image/{{ adapter.image_format.lower() }}";
+      </script>
       <script type="text/javascript" src="assets/client.js"></script>
    </body>
 </html>
