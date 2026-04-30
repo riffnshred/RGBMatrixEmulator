@@ -2,15 +2,14 @@ from typing import Any
 
 import numpy as np
 from PIL import Image, ImageEnhance
-from RGBMatrixEmulator.emulation.options import RGBMatrixOptions
+from RGBMatrixEmulator.emulation.options import RGBMatrixOptions, visible_dims
 
 
 class Canvas:
     def __init__(self, options: RGBMatrixOptions) -> None:
         self.options = options
 
-        self.width = options.cols * options.chain_length
-        self.height = options.rows * options.parallel
+        self.width, self.height = visible_dims(options)
 
         # 3D numpy array -- rows (H), columns (W), 3-tuple RGB
         self.__pdims = (self.height, self.width, 3)

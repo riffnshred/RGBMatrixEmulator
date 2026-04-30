@@ -1,15 +1,14 @@
 from PIL import Image
 
 from RGBMatrixEmulator.emulation.canvas import Canvas
-from RGBMatrixEmulator.emulation.options import RGBMatrixOptions
+from RGBMatrixEmulator.emulation.options import RGBMatrixOptions, visible_dims
 
 
 class RGBMatrix:
     def __init__(self, options: RGBMatrixOptions = RGBMatrixOptions()) -> None:
         self.options = options
 
-        self.width = options.cols * options.chain_length
-        self.height = options.rows * options.parallel
+        self.width, self.height = visible_dims(options)
 
     def CreateFrameCanvas(self) -> Canvas:
         self.canvas = Canvas(options=self.options)

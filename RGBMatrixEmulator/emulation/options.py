@@ -1,6 +1,39 @@
 from RGBMatrixEmulator.internal.emulator_config import RGBMatrixEmulatorConfig
 
 
+def visible_dims(options) -> tuple[int, int]:
+    """Return (visible_width, visible_height) after applying pixel_mapper transforms."""
+    cols = options.cols
+    rows = options.rows
+    chain = options.chain_length
+    parallel = options.parallel
+    mapper = getattr(options, "pixel_mapper_config", "") or ""
+
+    w = cols * chain
+    h = rows * parallel
+    for part in mapper.split(";"):
+        part = part.strip()
+        if not part:
+            continue
+        name, _, param = part.partition(":")
+        name = name.strip().lower()
+        param = param.strip()
+        if name == "rotate":
+            angle = (int(param) + 360) % 360 if param else 0
+            if angle % 180 != 0:
+                w, h = h, w
+        elif name == "u-mapper":
+            w, h = (w // 64) * 32, 2 * h
+        elif name == "v-mapper":
+            w, h = w * parallel // chain, h * chain // parallel
+        elif name == "stacktorow":
+            w, h = w * parallel, h // parallel
+        elif name == "remap":
+            dims = param.split("|")[0].split(",")
+            w, h = int(dims[0]), int(dims[1])
+    return w, h
+
+
 class RGBMatrixOptions:
     def __init__(self) -> None:
         self.hardware_mapping = "EMULATED"
@@ -36,10 +69,8 @@ class RGBMatrixOptions:
         self.pi5 = emulator_config.pi5
 
     def window_size(self) -> tuple[int, int]:
-        return (
-            self.cols * self.pixel_size * self.chain_length,
-            self.rows * self.pixel_size * self.parallel,
-        )
+        w, h = visible_dims(self)
+        return (w * self.pixel_size, h * self.pixel_size)
 
     def window_size_str(self, pixel_text: str = "") -> str:
         width, height = self.window_size()
