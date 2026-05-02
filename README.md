@@ -45,6 +45,8 @@ from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions
 
 After this, most of the existing command line arguments from the `rpi-rgb-led-matrix` library still apply. You should reference the [project README](https://github.com/hzeller/rpi-rgb-led-matrix/blob/master/README.md) for that library when necessary.
 
+The emulator respects the `pixel_mapper_config` option on `RGBMatrixOptions`. Transforms such as `Rotate:90`, `U-mapper`, `V-mapper`, and `StackToRow` are applied when calculating the visible canvas dimensions, so the emulator window matches the expected output of the real hardware.
+
 Startup of the existing script will be unchanged.
 
 ## Customization
@@ -144,7 +146,7 @@ Certain adapters may specify additional configurations. These specialized config
 | browser.quality          | Integer | Value from 0 - 100 indicating the quality percentage for the rendered image. Higher values may lead to lower performance.
 | browser.image_border     | Bool    | Display a slight border around the rendered image.
 | browser.debug_text       | Bool    | Display debug text.
-| browser.image_format     | String  | Image format to use for rendering. Options are "JPEG" or "PNG".
+| browser.image_format     | String  | Image format to use for rendering. Options are `"JPEG"`, `"PNG"`, `"WebP"`, or `"BMP"`. WebP uses the fast real-time encoder (libwebp `method=0`) for reduced CPU overhead.
 | browser.open_immediately | Bool    | Open a new browser window immediately on startup (similar to other adapters).
 | browser.controls_layout  | String  | Layout of the GPIO controls panel in the browser UI. Options are `"horizontal"` (panel below the matrix) or `"vertical"` (panel to the right).
 
@@ -277,7 +279,36 @@ GPIO.output(29, GPIO.HIGH)
 
 Both the `pygame` and `browser` adapters display a live controls panel that mirrors the current GPIO state. In the `browser` adapter, the panel is also interactive — you can click buttons, flip toggles, turn encoders, and drag potentiometer sliders directly in the browser.
 
+The layout of the panel in the browser UI is controlled by `browser.controls_layout` in `emulator_config.json`:
+
+- `"horizontal"` — controls panel appears below the matrix (default)
+- `"vertical"` — controls panel appears to the right of the matrix
+
 See `samples/gpio-all-controls.py` for a complete working example using every control type.
+
+#### Browser GPIO HTTP API
+
+The browser adapter exposes two HTTP endpoints for reading and driving GPIO state programmatically:
+
+**`GET /gpio`** — returns current pin states, encoder positions, potentiometer values, and RGB LED colors as JSON:
+
+```json
+{
+  "pins":     {"17": 0, "22": 1},
+  "encoders": {"23_24": 5},
+  "pots":     {"26": 64.0},
+  "rgb":      {"28": [255, 128, 0]}
+}
+```
+
+**`POST /gpio/trigger`** — drives a pin or encoder from external tooling. Request body shapes:
+
+```json
+{"type": "button",  "pin": 17, "value": 1}
+{"type": "toggle",  "pin": 22}
+{"type": "encoder", "clk_pin": 23, "dt_pin": 24, "direction": "cw"}
+{"type": "pot",     "pin": 26, "value": 75.0}
+```
 
 ### White Label Customization
 
