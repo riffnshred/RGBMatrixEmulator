@@ -2,6 +2,7 @@ import asyncio
 import signal
 import sys
 import threading
+import tornado.log
 import tornado.web
 import tornado.ioloop
 
@@ -32,6 +33,25 @@ class Server:
             script_path = Path(__file__).resolve().parent
             asset_path = script_path / "static" / "assets"
 
+            log_gpio = adapter.options.browser.log_gpio_requests
+
+            def _log_function(handler):
+                if not log_gpio and handler.request.path.startswith("/gpio"):
+                    return
+                if handler.get_status() < 400:
+                    log_method = tornado.log.access_log.info
+                elif handler.get_status() < 500:
+                    log_method = tornado.log.access_log.warning
+                else:
+                    log_method = tornado.log.access_log.error
+                request_time = 1000.0 * handler.request.request_time()
+                log_method(
+                    "%d %s %.2fms",
+                    handler.get_status(),
+                    handler._request_summary(),
+                    request_time,
+                )
+
             self.app = tornado.web.Application(
                 [
                     (r"/websocket", ImageWebSocketHandler),
@@ -50,7 +70,8 @@ class Server:
                         NoCacheStaticFileHandler,
                         {"path": asset_path, "default_filename": "client.js"},
                     ),
-                ]
+                ],
+                log_function=_log_function,
             )
 
             self.periodic = tornado.ioloop.PeriodicCallback(
