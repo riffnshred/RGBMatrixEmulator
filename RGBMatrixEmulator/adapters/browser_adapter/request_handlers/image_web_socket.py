@@ -44,6 +44,9 @@ class ImageWebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         ImageWebSocketHandler.clients.add(self)
         Logger.info("WebSocket opened from: " + self.request.remote_ip)
+        if ImageWebSocketHandler.adapter.image:
+            io_loop = tornado.ioloop.IOLoop.current()
+            io_loop.add_callback(self.write_message, ImageWebSocketHandler.adapter.image, binary=True)
 
     def on_message(self, _message):
         if not ImageWebSocketHandler.adapter.image:
